@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "953958125197",
+    "project_id": "gpscollector-13ecd"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:953958125197:android:6f2de55c137f3019",
+        "android_client_info": {
+          "package_name": "avnatarkin.hse.ru.gpscollector"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "953958125197-d2mpe5n7v98ghl5s3c24skjaeamdu7lm.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "avnatarkin.hse.ru.gpscollector",
+            "certificate_hash": "B8B3AF1B8DE78B23D5B13B6859E0CFCB82AE1597"
+          }
+        },
+        {
+          "client_id": "953958125197-beal21g8j5hrk20ee9ntsb2jc5o48d7o.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAvYfCb5vJFJZg1D4ETXH8pO5ac2BUolWU"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 1
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
