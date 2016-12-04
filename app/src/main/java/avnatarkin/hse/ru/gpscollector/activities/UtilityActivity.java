@@ -1,4 +1,4 @@
-package avnatarkin.hse.ru.gpscollector;
+package avnatarkin.hse.ru.gpscollector.activities;
 
 import android.app.ActionBar;
 import android.app.Activity;
@@ -17,11 +17,9 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.net.ConnectivityManager;
-import android.net.Uri;
 import android.preference.PreferenceManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.NotificationCompat;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -44,17 +42,24 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.lang.reflect.Field;
 
+import avnatarkin.hse.ru.gpscollector.constants.Constants;
+import avnatarkin.hse.ru.gpscollector.MainActivity;
+import avnatarkin.hse.ru.gpscollector.R;
 import avnatarkin.hse.ru.gpscollector.fragments.ChangePushTimeFragment;
+import avnatarkin.hse.ru.gpscollector.fragments.ChangeSyncTimeFragment;
 import avnatarkin.hse.ru.gpscollector.services.PushLocationService;
+import avnatarkin.hse.ru.gpscollector.util.NetworkUtil;
 
 public class UtilityActivity extends Activity implements
-        ChangePushTimeFragment.DialogListener {
+        ChangePushTimeFragment.DialogListener, ChangeSyncTimeFragment.SyncDialogListener {
     // Preferences
     private SharedPreferences mSharedPreferences;
     private SharedPreferences.Editor mEditor;
 
     // App info
     private int mTimeToPush = 1;
+    private int mTimeToSync = 5;
+
     private boolean mAlreadyRunning;
 
     // Activity stuff
@@ -109,6 +114,7 @@ public class UtilityActivity extends Activity implements
         mAlreadyRunning =
                 mSharedPreferences.getBoolean(Constants.SERVICE_RUNNING, false);
         mTimeToPush = mSharedPreferences.getInt(Constants.PUSH_TIME, 1);
+        mTimeToSync = mSharedPreferences.getInt(Constants.SYNC_TIME,5);
 
         // Set the text at the left of the Switch
         ((TextView) findViewById(R.id.toggleText)).setText((mAlreadyRunning) ?
@@ -296,6 +302,28 @@ public class UtilityActivity extends Activity implements
         // Update the text from the button
         updatePushButton();
     }
+    @Override
+    public void onSyncDialogPositiveClick(DialogFragment dialog, int which) {
+        if (which == 0) {
+            mTimeToSync = 5;
+        } else if (which == 1) {
+            mTimeToSync = 10;
+        } else if (which == 2) {
+            mTimeToSync = 15;
+        } else if (which == 3) {
+            mTimeToSync = 20;
+        }
+
+        // Add the time to sync in the preferences
+        mEditor.putInt(Constants.SYNC_TIME, mTimeToSync);
+        mEditor.apply();
+
+        // Update the text from the button
+        updateSyncSheduller();
+    }
+
+    private void updateSyncSheduller() {
+    }
 
     @Override
     protected void onPause() {
@@ -335,9 +363,14 @@ public class UtilityActivity extends Activity implements
             Toast.makeText(this, "Nothing there", Toast.LENGTH_LONG).show();
         // TODO: something for help
         }
+        else if (id == R.id.action_sync_settings) {
+            ChangeSyncTimeFragment fragment = new ChangeSyncTimeFragment();
+            fragment.show(getFragmentManager(), "GCOLL_DIALOG_PUSH");
+        }
 
         return super.onOptionsItemSelected(item);
     }
+
 
     public class ConnectionStatusReceiver extends BroadcastReceiver {
         @Override

@@ -1,4 +1,4 @@
-package avnatarkin.hse.ru.gpscollector;
+package avnatarkin.hse.ru.gpscollector.activities;
 
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -21,6 +21,9 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.OptionalPendingResult;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
+
+import avnatarkin.hse.ru.gpscollector.R;
+import avnatarkin.hse.ru.gpscollector.constants.Constants;
 
 public class AuticationActivity extends AppCompatActivity implements
         GoogleApiClient.OnConnectionFailedListener,

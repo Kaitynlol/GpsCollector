@@ -1,4 +1,4 @@
-package avnatarkin.hse.ru.gpscollector;
+package avnatarkin.hse.ru.gpscollector.constants;
 
 public class Constants {
     public Constants() {
@@ -6,11 +6,12 @@ public class Constants {
     }
 
     public static final String FIRST_TIME = "first_time";
-    public static final String URL = "url";
+    public static final String URL = "http://192.168.42.127:8080/SpringRest/rest/emp/create";
     public static final String TOKEN = "token";
     public static final String DATASOURCE_VARIABLE = "location";
     public static final String VARIABLE_ID = "variable";
     public static final String PUSH_TIME = "push_time";
+    public static final String SYNC_TIME = "sync_time";
     public static final String SERVICE_RUNNING = "service_running";
 
     public static final int SUCCESS_RESULT = 0;
