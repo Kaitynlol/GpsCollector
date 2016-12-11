@@ -2,7 +2,7 @@
     <string name="app_name">GpsCollector</string>
     <!-- Strings for the ActionBar -->
     <string name="actionBar_title">Location</string>
-    <!-- String for the MainActivity -->
+    <!-- String for the AuticationActivity -->
     <string name="main_descriptionText1">This app collect location data due database and send them throw server </string>
     <string name="main_descriptionText2">GpsCollector for Android® helps you push sensor data
         from your phone to your Google account</string>
@@ -89,6 +89,8 @@
 
     <!-- Strings for the DialogFragment -->
     <string name="dialogFragment_title">Choose the interval</string>
+    <string name="dialogSyncFragment_title">Server synchronization time</string>
+
 
     <string-array name="dialogFragment_pushTimes">
         <item>1 sec</item>
@@ -96,7 +98,15 @@
         <item>30 sec</item>
         <item>1 min</item>
     </string-array>
+
+    <string-array name="dialogFragment_syncTimes">
+        <item>5 days</item>
+        <item>10 days</item>
+        <item>15 days</item>
+        <item>20 days</item>
+    </string-array>
     <!-- Strings for /menu/ubidots.xml -->
     <string name="action_linkPhone">Relink my phone</string>
+    <string name="action_sync_settings">Settings</string>
     <string name="action_help">Help</string>
 </resources>

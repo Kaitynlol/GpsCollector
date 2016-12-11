@@ -12,7 +12,7 @@ public class DBHelper extends SQLiteOpenHelper {
     private final static String LOG_TAG = "TDbHelper";
 
     private final static int DATABASE_VERSION = 1;
-    private static final String DATABASE_NAME = "loctable.db";
+    private static final String DATABASE_NAME = "locationtable.db";
 
     public DBHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);

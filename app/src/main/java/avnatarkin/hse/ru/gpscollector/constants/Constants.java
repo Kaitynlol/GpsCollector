@@ -1,12 +1,15 @@
 package avnatarkin.hse.ru.gpscollector.constants;
 
 public class Constants {
+
     public Constants() {
         // Required empty body constructor
     }
 
+    public static final String USER_NAME = "userName";
     public static final String FIRST_TIME = "first_time";
-    public static final String URL = "http://192.168.42.127:8080/SpringRest/rest/emp/create";
+    public static final String URL = "http://192.168.42.201:8080/SpringRest/rest/emp/create";
+    public static final String URL_CREATE_USER = "http://192.168.42.201:8080/SpringRest/rest/user/create";
     public static final String TOKEN = "token";
     public static final String DATASOURCE_VARIABLE = "location";
     public static final String VARIABLE_ID = "variable";
@@ -30,8 +33,9 @@ public class Constants {
     public static final int NOTIFICATION_ID = 1337;
 
 
-    public static class VARIABLE_CONTEXT {
-        public static final String LATITUDE = "lat";
-        public static final String LONGITUDE = "lng";
+    public static class VARIABLE_DATABASE {
+        public static final String ID_ROAD = "id_road";
+        public static final String ROAD = "road";
+        public static final String TIME = "time";
     }
 }

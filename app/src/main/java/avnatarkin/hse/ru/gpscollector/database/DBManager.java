@@ -10,6 +10,7 @@ import android.util.Log;
 
 import java.io.IOException;
 import java.util.Locale;
+import java.util.Map;
 
 /**
  * Created by sanjar on 11.11.16.
@@ -23,8 +24,7 @@ public class DBManager {
 
 
     public DBManager(Context context) {
-        //this.context = context;
-        // Connecting to DB
+       // Connecting to DB
         dbh = new DBHelper(context);
         db = dbh.getWritableDatabase();
     }
@@ -43,6 +43,9 @@ public class DBManager {
         cv.put("longitude", Longitude);
         cv.put("road", road);
         db.insert(DBLocation.TABLE_TODO, null, cv);
+    }
+    public void insert(Map<String, Long> mPreparedLocation, Context context) {
+        //TODO
     }
 
     public void read() {

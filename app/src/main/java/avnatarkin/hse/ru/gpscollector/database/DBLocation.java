@@ -1,7 +1,10 @@
 package avnatarkin.hse.ru.gpscollector.database;
 
 import android.database.sqlite.SQLiteDatabase;
+import android.provider.SyncStateContract;
 import android.util.Log;
+
+import avnatarkin.hse.ru.gpscollector.constants.Constants;
 
 /**
  * Created by sanjar on 11.11.16.
@@ -9,20 +12,15 @@ import android.util.Log;
 
 public class DBLocation {
     // Database table
-    public static final String TABLE_TODO = "loc";
-    public static final String COLUMN_ID = "id";
-    public static final String COLUMN_LONGITUDE = "longitude";
-    public static final String COLUMN_LATITUDE = "latitude";
-    public static final String COLUMN_ROAD = "road";
+    public static final String TABLE_TODO = Constants.USER_NAME;
 
     // Database creation SQL statement
     private static final String DATABASE_CREATE = "create table "
             + TABLE_TODO
             + " ("
-            + COLUMN_ID + " integer primary key autoincrement,"
-            + COLUMN_LONGITUDE + " text not null, "
-            + COLUMN_LATITUDE + " text not null, "
-            + COLUMN_ROAD + " text not null"
+            + Constants.VARIABLE_DATABASE.ID_ROAD + " integer primary key autoincrement,"
+            + Constants.VARIABLE_DATABASE.ROAD + " text not null, "
+            + Constants.VARIABLE_DATABASE.TIME + " text not null "
             + ");";
 
     public static void onCreate(SQLiteDatabase database) {

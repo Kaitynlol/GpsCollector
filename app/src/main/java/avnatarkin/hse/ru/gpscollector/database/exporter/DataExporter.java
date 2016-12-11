@@ -13,7 +13,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 
-import avnatarkin.hse.ru.gpscollector.Constants;
+import avnatarkin.hse.ru.gpscollector.constants.Constants;
 
 public abstract class DataExporter {
 

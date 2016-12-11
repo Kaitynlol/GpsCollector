@@ -22,10 +22,15 @@ import com.google.android.gms.common.api.OptionalPendingResult;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import avnatarkin.hse.ru.gpscollector.R;
 import avnatarkin.hse.ru.gpscollector.constants.Constants;
+import avnatarkin.hse.ru.gpscollector.receivers.SyncReceiver;
 
-public class AuticationActivity extends AppCompatActivity implements
+
+public class LoggingActivity extends AppCompatActivity implements
         GoogleApiClient.OnConnectionFailedListener,
         View.OnClickListener {
     private static final String TAG = "TSignInActivity";
@@ -40,7 +45,7 @@ public class AuticationActivity extends AppCompatActivity implements
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_autication);
+        setContentView(R.layout.activity_logging);
         // Views
         mStatusTextView = (TextView) findViewById(R.id.status);
         mPlayImage = (ImageView) findViewById(R.id.google_icon);
@@ -126,6 +131,13 @@ public class AuticationActivity extends AppCompatActivity implements
             GoogleSignInAccount acct = result.getSignInAccount();
             editor.putString("userName",acct.getEmail());
             editor.commit();
+            JSONObject json = new JSONObject();
+            try {
+                json.put("userName",acct.getEmail());
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            new SyncReceiver.HttpAsyncTask(this, json,Constants.URL_CREATE_USER).execute();
             mStatusTextView.setText(getString(R.string.signed_in_fmt, acct.getDisplayName()));
 
             updateUI(true);
@@ -248,7 +260,7 @@ public class AuticationActivity extends AppCompatActivity implements
     private class ImagePlayClickListener implements View.OnClickListener {
         @Override
         public void onClick(View view) {
-            startActivity(new Intent(AuticationActivity.this, UtilityActivity.class));
+            startActivity(new Intent(LoggingActivity.this, MainActivity.class));
         }
     }
 }

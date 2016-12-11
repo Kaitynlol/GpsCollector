@@ -2,6 +2,7 @@ package avnatarkin.hse.ru.gpscollector.services;
 
 import android.Manifest;
 import android.app.AlarmManager;
+import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
@@ -9,6 +10,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -22,20 +24,24 @@ import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 import android.widget.Toast;
 
-import avnatarkin.hse.ru.gpscollector.Constants;
-import avnatarkin.hse.ru.gpscollector.NetworkUtil;
+import avnatarkin.hse.ru.gpscollector.constants.Constants;
+import avnatarkin.hse.ru.gpscollector.R;
+import avnatarkin.hse.ru.gpscollector.database.DBManager;
+import avnatarkin.hse.ru.gpscollector.receivers.SyncReceiver;
+import avnatarkin.hse.ru.gpscollector.util.NetworkUtil;
+import avnatarkin.hse.ru.gpscollector.util.Sheduller;
 
 
+import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Locale;
 import java.util.Map;
+import java.util.TreeMap;
 
-public class PushLocationService extends Service implements LocationListener {
+public class PushLocationService extends Service implements LocationListener, Sheduller {
     private static final String TAG = "LSERVICE";
-
-    // For repeating this service
-    private AlarmManager mAlarmManager;
-    private PendingIntent mAlarmIntent;
 
     // For location updates
     private LocationManager mLocationManager;
@@ -43,6 +49,12 @@ public class PushLocationService extends Service implements LocationListener {
     // Read preference data
     private SharedPreferences mPrefs;
     private SharedPreferences.Editor mEditor;
+    //Shedulling
+    private int mTimeToSync = 5;
+    //DataBase
+    private DBManager mDbManager;
+    private Map<String, Long> mPreparedLocation;
+
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -52,14 +64,17 @@ public class PushLocationService extends Service implements LocationListener {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.d(TAG, "onStartCommand");
-       // super.onStartCommand(intent, flags, startId);
+        // super.onStartCommand(intent, flags, startId);
         // Get the update frequency
         int updateFreq = mPrefs.getInt(Constants.PUSH_TIME, 1);
-        Log.d(TAG, "PushTime: "+updateFreq);
+        Log.d(TAG, "PushTime: " + updateFreq);
         // Get the Network status
         int connectionStatus = NetworkUtil.getConnectionStatus(this);
         // Check if the service is still activated by the user
         boolean isRunning = mPrefs.getBoolean(Constants.SERVICE_RUNNING, false);
+        mTimeToSync = mPrefs.getInt(Constants.SYNC_TIME, 5);
+        mDbManager = new  DBManager(this);
+
 
         // If we have network connection
         if ((isRunning) && (connectionStatus == NetworkUtil.TYPE_MOBILE ||
@@ -72,11 +87,11 @@ public class PushLocationService extends Service implements LocationListener {
             }
             Log.d(TAG, "BLABLA");
             mLocationManager.requestLocationUpdates(provider, updateFreq * 1000, 10f, this);
+            //scheduleNotification(getNotification(mTimeToSync+"days delay"), mTimeToSync*1000);
         } else {
 
             mLocationManager.removeUpdates(this);
         }
-
         return START_STICKY;
     }
 
@@ -100,6 +115,7 @@ public class PushLocationService extends Service implements LocationListener {
             return;
         }
         mLocationManager.removeUpdates(this);
+        deleteNotification();
 
         super.onDestroy();
     }
@@ -117,22 +133,37 @@ public class PushLocationService extends Service implements LocationListener {
 
     @Override
     public void onLocationChanged(Location location) {
-        String token = mPrefs.getString(Constants.TOKEN, null);
-        showLocation(location);
-       // new UbidotsAPI(location.getLongitude(), location.getLatitude(),
-               // location.getAltitude()).execute(token);
-    }
-    private void showLocation(Location location) {
-        if (location == null)
-            return;
-        if (location.getProvider().equals(LocationManager.GPS_PROVIDER)) {
-            Log.e(TAG, formatLocation(location));
-        } else if (location.getProvider().equals(
-                LocationManager.NETWORK_PROVIDER)) {
-            Log.e(TAG, formatLocation(location));
+        String roadName = "";
+        try {
+            roadName = getRoadFromLocation(location);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-       // updateDataBase(location);
+        if (mPreparedLocation == null) {
+            mPreparedLocation = new HashMap<String, Long>();
+            mPreparedLocation.put(roadName, location.getTime());
+
+        } else if (!mPreparedLocation.containsKey(roadName)) {
+            long nTime = mPreparedLocation.values().iterator().next();
+            mPreparedLocation.remove(mPreparedLocation.keySet().iterator().next());
+            mPreparedLocation.put(roadName, location.getTime() - nTime);
+            mDbManager.insert(mPreparedLocation, this);
+
+        }
+
     }
+
+    private String getRoadFromLocation(Location location) throws IOException {
+        Geocoder geocoder = new Geocoder(this, Locale.getDefault());
+        String[] lines = geocoder.getFromLocation(location.getLatitude(),
+                location.getLongitude(), 1).get(0).getAddressLine(0).split(",");
+        return lines[0];
+    }
+
+    private void showLocation(Location location) {
+        Log.e(TAG, formatLocation(location));
+    }
+
     private String formatLocation(Location location) {
         if (location == null)
             return "";
@@ -143,68 +174,39 @@ public class PushLocationService extends Service implements LocationListener {
     }
 
     @Override
-    public void onStatusChanged(String provider, int status, Bundle extras) { }
-
-    @Override
-    public void onProviderEnabled(String provider) { }
-
-    @Override
-    public void onProviderDisabled(String provider) { }
-
-    public class UbidotsAPI extends AsyncTask<String, Void, Void> {
-        private final String variableID = mPrefs.getString(Constants.VARIABLE_ID, null);
-        private double longitude;
-        private double latitude;
-        private double altitude;
-
-        public UbidotsAPI(double longitude, double latitude, double altitude) {
-            this.longitude = longitude;
-            this.latitude = latitude;
-            this.altitude = altitude;
-        }
-
-        @Override
-        protected Void doInBackground(String... params) {
-            try {
-                Map<String, Object> context = new HashMap<String, Object>();
-               // ApiClient apiClient = new ApiClient().fromToken(params[0]);
-
-                if (variableID != null) {
-                   // Variable variable = apiClient.getVariable(variableID);
-                    context.put(Constants.VARIABLE_CONTEXT.LATITUDE, latitude);
-                    context.put(Constants.VARIABLE_CONTEXT.LONGITUDE, longitude);
-
-                    if (!context.get(Constants.VARIABLE_CONTEXT.LATITUDE).equals(0.0) &&
-                            !context.get(Constants.VARIABLE_CONTEXT.LONGITUDE).equals(0.0)) {
-                      //  variable.saveValue(altitude, context);
-                    }
-                }
-            } catch (Exception e) {
-                Handler h = new Handler(getMainLooper());
-
-                h.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (getApplicationContext() != null) {
-                            Toast.makeText(getApplicationContext(),
-                                    "Error in connection",
-                                    Toast.LENGTH_SHORT).show();
-                        }
-                        cancel(true);
-                    }
-                });
-                mEditor.putBoolean(Constants.SERVICE_RUNNING, false);
-                mEditor.apply();
-                stopSelf();
-            }
-
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
-            stopSelf();
-        }
+    public void onStatusChanged(String provider, int status, Bundle extras) {
     }
+
+    @Override
+    public void onProviderEnabled(String provider) {
+    }
+
+    @Override
+    public void onProviderDisabled(String provider) {
+    }
+
+    @Override
+    public void scheduleNotification(Notification notification, int delay) {
+        Intent notificationIntent = new Intent(this, SyncReceiver.class);
+        notificationIntent.putExtra(SyncReceiver.NOTIFICATION_ID, 1);
+        notificationIntent.putExtra(SyncReceiver.NOTIFICATION, notification);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        long futureInMillis = SystemClock.elapsedRealtime() + delay;
+        AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        //alarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, futureInMillis, pendingIntent);
+        alarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                futureInMillis,
+                delay, pendingIntent);
+    }
+
+    @Override
+    public Notification getNotification(String content) {
+        Notification.Builder builder = new Notification.Builder(this);
+        builder.setContentTitle("Execution sync with server");
+        builder.setContentText(content);
+        builder.setSmallIcon(R.drawable.cast_ic_notification_on);
+        return builder.build();
+    }
+
 }

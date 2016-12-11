@@ -1,7 +1,6 @@
 package avnatarkin.hse.ru.gpscollector.activities;
 
 import android.app.ActionBar;
-import android.app.Activity;
 import android.app.DialogFragment;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -21,6 +20,7 @@ import android.preference.PreferenceManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.NotificationCompat;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -42,15 +42,15 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.lang.reflect.Field;
 
+import avnatarkin.hse.ru.gpscollector.AuticationActivity;
 import avnatarkin.hse.ru.gpscollector.constants.Constants;
-import avnatarkin.hse.ru.gpscollector.MainActivity;
 import avnatarkin.hse.ru.gpscollector.R;
 import avnatarkin.hse.ru.gpscollector.fragments.ChangePushTimeFragment;
 import avnatarkin.hse.ru.gpscollector.fragments.ChangeSyncTimeFragment;
 import avnatarkin.hse.ru.gpscollector.services.PushLocationService;
 import avnatarkin.hse.ru.gpscollector.util.NetworkUtil;
 
-public class UtilityActivity extends Activity implements
+public class MainActivity extends AppCompatActivity implements
         ChangePushTimeFragment.DialogListener, ChangeSyncTimeFragment.SyncDialogListener {
     // Preferences
     private SharedPreferences mSharedPreferences;
@@ -78,7 +78,7 @@ public class UtilityActivity extends Activity implements
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_utility);
+        setContentView(R.layout.activity_main);
         if (getActionBar() != null) {
             // Modify the ActionBar
             getActionBar().setDisplayShowHomeEnabled(false);
@@ -255,7 +255,7 @@ public class UtilityActivity extends Activity implements
         String ns = Context.NOTIFICATION_SERVICE;
         String notificationTitle = getString(R.string.notification_title);
 
-        Intent intent = new Intent(this, UtilityActivity.class);
+        Intent intent = new Intent(this, MainActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
 
         // We should use Compat, because we are using API 14+
@@ -356,7 +356,7 @@ public class UtilityActivity extends Activity implements
             mEditor.putInt(Constants.PUSH_TIME, 1);
             mEditor.apply();
 
-            Intent i = new Intent(this, MainActivity.class);
+            Intent i = new Intent(this, AuticationActivity.class);
             startActivity(i);
             finish();
         } else if (id == R.id.action_help) {
