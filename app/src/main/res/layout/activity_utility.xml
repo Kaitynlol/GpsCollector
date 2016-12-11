@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:gravity="center_vertical|center_horizontal"
-    tools:context="avnatarkin.hse.ru.gpscollector.UtilityActivity">
+    tools:context="avnatarkin.hse.ru.gpscollector.activities.UtilityActivity">
 
     <ImageView
         android:src="@mipmap/ic_paper_plane"
@@ -23,7 +23,7 @@
         android:id="@+id/map"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        tools:context=".UtilityActivity"
+        tools:context=".activities.UtilityActivity"
         android:name="com.google.android.gms.maps.MapFragment"
         android:layout_weight="1"
         tools:layout="@layout/activity_utility" />

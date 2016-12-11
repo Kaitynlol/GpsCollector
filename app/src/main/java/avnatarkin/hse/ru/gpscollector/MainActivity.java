@@ -10,7 +10,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.Toast;
 
+import avnatarkin.hse.ru.gpscollector.activities.AuticationActivity;
+import avnatarkin.hse.ru.gpscollector.constants.Constants;
 import avnatarkin.hse.ru.gpscollector.fragments.MainFragment;
+import avnatarkin.hse.ru.gpscollector.activities.UtilityActivity;
+
 public class MainActivity extends AppCompatActivity implements MainFragment.MainFragmentButtonsInterface {
     // We want to know if the user has logged in before
     private SharedPreferences mSharedPreferences;
@@ -58,7 +62,8 @@ public class MainActivity extends AppCompatActivity implements MainFragment.Main
     // Method from MainFragment
     @Override
     public void onSignUpButtonClick(Fragment fragment) {
-        startActivity(new Intent(this,AuticationActivity.class));
+       startActivity(new Intent(this,AuticationActivity.class));
+       // startActivity(new Intent(this,Sender.class));
     }
 
 }

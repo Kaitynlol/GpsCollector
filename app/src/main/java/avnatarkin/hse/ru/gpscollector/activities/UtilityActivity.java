@@ -21,6 +21,7 @@ import android.preference.PreferenceManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.NotificationCompat;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -50,7 +51,7 @@ import avnatarkin.hse.ru.gpscollector.fragments.ChangeSyncTimeFragment;
 import avnatarkin.hse.ru.gpscollector.services.PushLocationService;
 import avnatarkin.hse.ru.gpscollector.util.NetworkUtil;
 
-public class UtilityActivity extends Activity implements
+public class UtilityActivity extends AppCompatActivity implements
         ChangePushTimeFragment.DialogListener, ChangeSyncTimeFragment.SyncDialogListener {
     // Preferences
     private SharedPreferences mSharedPreferences;

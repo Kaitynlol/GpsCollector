@@ -2,6 +2,7 @@ package avnatarkin.hse.ru.gpscollector.services;
 
 import android.Manifest;
 import android.app.AlarmManager;
+import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
@@ -22,15 +23,18 @@ import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 import android.widget.Toast;
 
-import avnatarkin.hse.ru.gpscollector.Constants;
-import avnatarkin.hse.ru.gpscollector.NetworkUtil;
+import avnatarkin.hse.ru.gpscollector.constants.Constants;
+import avnatarkin.hse.ru.gpscollector.R;
+import avnatarkin.hse.ru.gpscollector.receivers.SyncReceiver;
+import avnatarkin.hse.ru.gpscollector.util.NetworkUtil;
+import avnatarkin.hse.ru.gpscollector.util.Sheduller;
 
 
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-public class PushLocationService extends Service implements LocationListener {
+public class PushLocationService extends Service implements LocationListener, Sheduller {
     private static final String TAG = "LSERVICE";
 
     // For repeating this service
@@ -43,6 +47,8 @@ public class PushLocationService extends Service implements LocationListener {
     // Read preference data
     private SharedPreferences mPrefs;
     private SharedPreferences.Editor mEditor;
+    //Shedulling
+    private int mTimeToSync = 5;
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -60,6 +66,7 @@ public class PushLocationService extends Service implements LocationListener {
         int connectionStatus = NetworkUtil.getConnectionStatus(this);
         // Check if the service is still activated by the user
         boolean isRunning = mPrefs.getBoolean(Constants.SERVICE_RUNNING, false);
+        mTimeToSync = mPrefs.getInt(Constants.SYNC_TIME,5);
 
         // If we have network connection
         if ((isRunning) && (connectionStatus == NetworkUtil.TYPE_MOBILE ||
@@ -72,6 +79,7 @@ public class PushLocationService extends Service implements LocationListener {
             }
             Log.d(TAG, "BLABLA");
             mLocationManager.requestLocationUpdates(provider, updateFreq * 1000, 10f, this);
+            scheduleNotification(getNotification(mTimeToSync+"days delay"), mTimeToSync*1000);
         } else {
 
             mLocationManager.removeUpdates(this);
@@ -150,6 +158,30 @@ public class PushLocationService extends Service implements LocationListener {
 
     @Override
     public void onProviderDisabled(String provider) { }
+
+    @Override
+    public void scheduleNotification(Notification notification, int delay) {
+        Intent notificationIntent = new Intent(this, SyncReceiver.class);
+        notificationIntent.putExtra(SyncReceiver.NOTIFICATION_ID, 1);
+        notificationIntent.putExtra(SyncReceiver.NOTIFICATION, notification);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        long futureInMillis = SystemClock.elapsedRealtime() + delay;
+        AlarmManager alarmManager = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
+        //alarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, futureInMillis, pendingIntent);
+        alarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                futureInMillis,
+                delay, pendingIntent);
+    }
+
+    @Override
+    public Notification getNotification(String content) {
+        Notification.Builder builder = new Notification.Builder(this);
+        builder.setContentTitle("Execution sync with server");
+        builder.setContentText(content);
+        builder.setSmallIcon(R.drawable.cast_ic_notification_on);
+        return builder.build();
+    }
 
     public class UbidotsAPI extends AsyncTask<String, Void, Void> {
         private final String variableID = mPrefs.getString(Constants.VARIABLE_ID, null);
