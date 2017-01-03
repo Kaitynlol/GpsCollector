@@ -1,7 +1,6 @@
 package avnatarkin.hse.ru.gpscollector.database;
 
 import android.database.sqlite.SQLiteDatabase;
-import android.provider.SyncStateContract;
 import android.util.Log;
 
 import avnatarkin.hse.ru.gpscollector.constants.Constants;
@@ -12,7 +11,7 @@ import avnatarkin.hse.ru.gpscollector.constants.Constants;
 
 public class DBLocation {
     // Database table
-    public static final String TABLE_TODO = Constants.USER_NAME;
+    public static final String TABLE_TODO = "routeData";
 
     // Database creation SQL statement
     private static final String DATABASE_CREATE = "create table "

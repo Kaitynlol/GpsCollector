@@ -6,11 +6,16 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.location.Geocoder;
 import android.location.Location;
+import android.location.LocationListener;
 import android.util.Log;
 
 import java.io.IOException;
 import java.util.Locale;
 import java.util.Map;
+
+import avnatarkin.hse.ru.gpscollector.constants.Constants;
+import avnatarkin.hse.ru.gpscollector.database.exporter.DataExporter;
+import avnatarkin.hse.ru.gpscollector.database.exporter.DataJsonExporter;
 
 /**
  * Created by sanjar on 11.11.16.
@@ -19,17 +24,11 @@ import java.util.Map;
 public class DBManager {
     private final static String LOG_TAG = "TDBManager";
 
-    private final SQLiteDatabase db;
-    private final DBHelper dbh;
-
-
-    public DBManager(Context context) {
-       // Connecting to DB
-        dbh = new DBHelper(context);
-        db = dbh.getWritableDatabase();
+    public DBManager() {
     }
 
-    public void insert(Location location,Context context) throws IOException {
+    @Deprecated
+    public void insert(Location location, Context context) throws IOException {
         Geocoder geocoder = new Geocoder(context, Locale.getDefault());
         double Latitude = location.getLatitude();
         double Longitude = location.getLongitude();
@@ -42,14 +41,33 @@ public class DBManager {
         cv.put("latitude", Latitude);
         cv.put("longitude", Longitude);
         cv.put("road", road);
-        db.insert(DBLocation.TABLE_TODO, null, cv);
-    }
-    public void insert(Map<String, Long> mPreparedLocation, Context context) {
-        //TODO
+        // db.insert(DBLocation.TABLE_TODO, null, cv);
     }
 
-    public void read() {
+    public static void insert(Context context, Map<String, Integer> mPreparedLocation) {
+        Log.d(LOG_TAG, "Write" + mPreparedLocation);
+        DBHelper dbh = new DBHelper(context);
+        SQLiteDatabase db = dbh.getWritableDatabase();
+
+        ContentValues cv = new ContentValues();
+        String road = mPreparedLocation.keySet().iterator().next();
+        cv.put(Constants.VARIABLE_DATABASE.ROAD, road);
+        cv.put(Constants.VARIABLE_DATABASE.TIME, mPreparedLocation.get(road));
+        db.insert(DBLocation.TABLE_TODO, null, cv);
+    }
+
+    public static String exportBase(Context context) throws Exception {
+        DBHelper dbh = new DBHelper(context);
+        SQLiteDatabase db = dbh.getWritableDatabase();
+        DataExporter dbe = new DataJsonExporter(db);
+        return dbe.export(dbh.getDatabaseName());
+    }
+
+    public static void read(Context context) {
         Log.d(LOG_TAG, "Read table " + DBLocation.TABLE_TODO);
+        DBHelper dbh = new DBHelper(context);
+        SQLiteDatabase db = dbh.getWritableDatabase();
+
         String SQL_QUERY = "SELECT * FROM " + DBLocation.TABLE_TODO;
         Cursor c;
 
@@ -58,7 +76,9 @@ public class DBManager {
 
     }
 
-    void cleanDB() {
+    public static void cleanDB(Context context) {
+        DBHelper dbh = new DBHelper(context);
+        SQLiteDatabase db = dbh.getWritableDatabase();
         db.beginTransaction();
 
         db.setTransactionSuccessful();
@@ -66,7 +86,7 @@ public class DBManager {
     }
 
     // Show data from cursor
-    void logCursor(Cursor c) {
+    static void logCursor(Cursor c) {
         if (c != null) {
             if (c.moveToFirst()) {
                 String str;
@@ -83,4 +103,7 @@ public class DBManager {
     }
 
 
+    public static int getRiskByRoad(LocationListener locationListener, Location location) {
+        return 6;
+    }
 }

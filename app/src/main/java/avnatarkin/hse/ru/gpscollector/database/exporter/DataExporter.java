@@ -13,8 +13,6 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 
-import avnatarkin.hse.ru.gpscollector.constants.Constants;
-
 public abstract class DataExporter {
 
     public static final String LOG_TAG = "DataExporter";
@@ -26,13 +24,13 @@ public abstract class DataExporter {
         this.db = db;
     }
 
-    public void export(String dbName, String exportFileNamePrefix) throws Exception {
+    public String export(String dbName) throws Exception {
         if (dbName == null) {
             throw new IllegalArgumentException("ExportConfig.databaseName must not be null");
         }
-        Log.i(LOG_TAG, "exporting database - " + dbName + " exportFileNamePrefix=" + exportFileNamePrefix);
+        Log.i(LOG_TAG, "exporting database - " + dbName + " exportFileNamePrefix=");
 
-        prepairExport(dbName);
+        prepairExport("anatarkina@mail.ru");
 
         // get the tables
         String sql = "select * from sqlite_master";
@@ -54,15 +52,14 @@ public abstract class DataExporter {
             }
         }
         c.close();
-        String output = getExportAsString();
-        this.writeToFile(output, exportFileNamePrefix + Constants.FILE_NAME);
         Log.i(LOG_TAG, "exporting database complete");
+        return getExportAsString();
     }
 
     private void exportTable(final String tableName) throws Exception {
         Log.d(LOG_TAG, "exporting table - " + tableName);
 
-        String sql = "select * from " + tableName;
+        String sql = "select roadName, roadTime from " + tableName;
         Cursor c = this.db.rawQuery(sql, new String[0]);
         int count = 1;
         startTable(tableName);

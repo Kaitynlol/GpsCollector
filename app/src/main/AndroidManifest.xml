@@ -43,6 +43,7 @@
             android:enabled="true"
             android:exported="true" />
 
+        <activity android:name=".activities.PrefActivity"></activity>
     </application>
 
 </manifest>

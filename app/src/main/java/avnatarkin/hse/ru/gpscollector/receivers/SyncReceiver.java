@@ -22,6 +22,7 @@ import javax.net.ssl.HttpsURLConnection;
 
 import avnatarkin.hse.ru.gpscollector.R;
 import avnatarkin.hse.ru.gpscollector.constants.Constants;
+import avnatarkin.hse.ru.gpscollector.database.DBManager;
 
 
 public class SyncReceiver extends BroadcastReceiver {
@@ -39,15 +40,14 @@ public class SyncReceiver extends BroadcastReceiver {
         int id = intent.getIntExtra(NOTIFICATION_ID, 0);
         notificationManager.notify(id, notification);
 
-        JSONObject root = new JSONObject();
+        String base = null;
         try {
-            root.put("id", 66);
-            root.put("name", "android");
-            root.put("createdDate", 148121643);
-        } catch (JSONException e) {
+            DBManager.exportBase(context);
+        } catch (Exception e) {
             e.printStackTrace();
         }
-        new HttpAsyncTask(context, root, Constants.URL).execute();
+
+        new HttpAsyncTask(context, base, Constants.URL).execute();
     }
 
     public static class HttpAsyncTask extends
@@ -55,13 +55,13 @@ public class SyncReceiver extends BroadcastReceiver {
 
         String urlString;
 
-        private final String TAG = "post json example";
+        private final String TAG = "POST_JSON";
         private Context context;
-        private JSONObject root;
+        private String root;
 
-        public HttpAsyncTask(Context context, JSONObject json, String URL) {
+        public HttpAsyncTask(Context context, String base, String URL) {
             this.urlString = URL;
-            this.root = json;
+            this.root = base;
             this.context = context;
         }
 
@@ -178,10 +178,9 @@ public class SyncReceiver extends BroadcastReceiver {
                 // root.put("securityInfo", Static.getSecurityInfo(context));
                 // root.put("advertisementId", advertisementId);
 
-                Log.e(TAG, "12 - root : " + root.toString());
+                Log.e(TAG, "12 - root : " + root);
 
-                String str = root.toString();
-                byte[] outputBytes = str.getBytes("UTF-8");
+                byte[] outputBytes = root.getBytes("UTF-8");
                 OutputStream os = conn.getOutputStream();
                 os.write(outputBytes);
 

@@ -16,10 +16,10 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.net.ConnectivityManager;
+import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.NotificationCompat;
-import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -36,6 +36,7 @@ import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -43,8 +44,9 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import java.lang.reflect.Field;
 
 import avnatarkin.hse.ru.gpscollector.AuticationActivity;
-import avnatarkin.hse.ru.gpscollector.constants.Constants;
 import avnatarkin.hse.ru.gpscollector.R;
+import avnatarkin.hse.ru.gpscollector.constants.Constants;
+import avnatarkin.hse.ru.gpscollector.database.DBManager;
 import avnatarkin.hse.ru.gpscollector.fragments.ChangePushTimeFragment;
 import avnatarkin.hse.ru.gpscollector.fragments.ChangeSyncTimeFragment;
 import avnatarkin.hse.ru.gpscollector.services.PushLocationService;
@@ -114,7 +116,7 @@ public class MainActivity extends AppCompatActivity implements
         mAlreadyRunning =
                 mSharedPreferences.getBoolean(Constants.SERVICE_RUNNING, false);
         mTimeToPush = mSharedPreferences.getInt(Constants.PUSH_TIME, 1);
-        mTimeToSync = mSharedPreferences.getInt(Constants.SYNC_TIME,5);
+        mTimeToSync = mSharedPreferences.getInt(Constants.SYNC_TIME, 5);
 
         // Set the text at the left of the Switch
         ((TextView) findViewById(R.id.toggleText)).setText((mAlreadyRunning) ?
@@ -143,9 +145,51 @@ public class MainActivity extends AppCompatActivity implements
                 public void onLocationChanged(Location location) {
                     mUserLocation = new LatLng(location.getLatitude(), location.getLongitude());
                     mGoogleMap.clear();
+                    int riskIndex = DBManager.getRiskByRoad(this, location);
+                    float color = 0;
+                    switch (riskIndex) {
+                        case 1:
+                            color = BitmapDescriptorFactory.HUE_AZURE;
+                            break;
+                        case 2:
+                            color = BitmapDescriptorFactory.HUE_BLUE;
+                            break;
+                        case 3:
+                            color = BitmapDescriptorFactory.HUE_CYAN;
+                            break;
+                        case 4:
+                            color = BitmapDescriptorFactory.HUE_GREEN;
+                            break;
+                        case 5:
+                            color = BitmapDescriptorFactory.HUE_MAGENTA;
+                            break;
+                        case 6:
+                            color = BitmapDescriptorFactory.HUE_ORANGE;
+                            break;
+                        case 7:
+                            color = BitmapDescriptorFactory.HUE_RED;
+                            break;
+                        case 8:
+                            color = BitmapDescriptorFactory.HUE_ROSE;
+                            break;
+                        case 9:
+                            color = BitmapDescriptorFactory.HUE_VIOLET;
+                            break;
+                        case 10:
+                            color = BitmapDescriptorFactory.HUE_YELLOW;
+                            break;
+                        default:
+                            color = BitmapDescriptorFactory.HUE_AZURE;
+                            break;
+                    }
+
+
                     mUserMarker = mGoogleMap.addMarker(new MarkerOptions()
                             .position(mUserLocation)
-                            .title(getString(R.string.location)));
+                            .icon(BitmapDescriptorFactory
+                                    .defaultMarker(color))
+                            .title(getString(R.string.location))
+                    );
                     mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mUserLocation, 17));
                 }
 
@@ -214,6 +258,7 @@ public class MainActivity extends AppCompatActivity implements
     public void startRepeatingService() {
         startService(new Intent(this, PushLocationService.class));
     }
+
     public void stopRepeatingService() {
         stopService(new Intent(this, PushLocationService.class));
     }
@@ -232,12 +277,11 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     // Check if Google Maps is installed
-    public boolean isGoogleMapsInstalled()
-    {
+    public boolean isGoogleMapsInstalled() {
         try {
             ApplicationInfo info = getPackageManager().getApplicationInfo("com.google.android.apps.maps", 0);
             return true;
-        } catch(PackageManager.NameNotFoundException e) {
+        } catch (PackageManager.NameNotFoundException e) {
             return false;
         }
     }
@@ -302,6 +346,7 @@ public class MainActivity extends AppCompatActivity implements
         // Update the text from the button
         updatePushButton();
     }
+
     @Override
     public void onSyncDialogPositiveClick(DialogFragment dialog, int which) {
         if (which == 0) {
@@ -323,6 +368,7 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     private void updateSyncSheduller() {
+        //TODO updating sheduler
     }
 
     @Override
@@ -361,16 +407,14 @@ public class MainActivity extends AppCompatActivity implements
             finish();
         } else if (id == R.id.action_help) {
             Toast.makeText(this, "Nothing there", Toast.LENGTH_LONG).show();
-        // TODO: something for help
-        }
-        else if (id == R.id.action_sync_settings) {
+            // TODO: something for help
+        } else if (id == R.id.action_sync_settings) {
             ChangeSyncTimeFragment fragment = new ChangeSyncTimeFragment();
             fragment.show(getFragmentManager(), "GCOLL_DIALOG_PUSH");
         }
 
         return super.onOptionsItemSelected(item);
     }
-
 
     public class ConnectionStatusReceiver extends BroadcastReceiver {
         @Override

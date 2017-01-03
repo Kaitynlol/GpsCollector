@@ -14,33 +14,30 @@ import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
-import android.os.AsyncTask;
+import android.media.AudioManager;
+import android.media.SoundPool;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.IBinder;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
-import android.widget.Toast;
 
-import avnatarkin.hse.ru.gpscollector.constants.Constants;
+import java.io.IOException;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
+
 import avnatarkin.hse.ru.gpscollector.R;
+import avnatarkin.hse.ru.gpscollector.constants.Constants;
 import avnatarkin.hse.ru.gpscollector.database.DBManager;
 import avnatarkin.hse.ru.gpscollector.receivers.SyncReceiver;
 import avnatarkin.hse.ru.gpscollector.util.NetworkUtil;
 import avnatarkin.hse.ru.gpscollector.util.Sheduller;
 
-
-import java.io.IOException;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.TreeMap;
-
-public class PushLocationService extends Service implements LocationListener, Sheduller {
+public class PushLocationService extends Service implements LocationListener, Sheduller, SoundPool.OnLoadCompleteListener {
     private static final String TAG = "LSERVICE";
 
     // For location updates
@@ -51,9 +48,8 @@ public class PushLocationService extends Service implements LocationListener, Sh
     private SharedPreferences.Editor mEditor;
     //Shedulling
     private int mTimeToSync = 5;
-    //DataBase
-    private DBManager mDbManager;
-    private Map<String, Long> mPreparedLocation;
+
+    private Map<String, Integer> mPreparedLocation;
 
 
     @Override
@@ -73,7 +69,8 @@ public class PushLocationService extends Service implements LocationListener, Sh
         // Check if the service is still activated by the user
         boolean isRunning = mPrefs.getBoolean(Constants.SERVICE_RUNNING, false);
         mTimeToSync = mPrefs.getInt(Constants.SYNC_TIME, 5);
-        mDbManager = new  DBManager(this);
+        mPreparedLocation = new HashMap<String, Integer>();
+        mPreparedLocation.put(mPrefs.getString("lastLoc", "улица Бусыгина"), 0);
 
 
         // If we have network connection
@@ -87,7 +84,7 @@ public class PushLocationService extends Service implements LocationListener, Sh
             }
             Log.d(TAG, "BLABLA");
             mLocationManager.requestLocationUpdates(provider, updateFreq * 1000, 10f, this);
-            //scheduleNotification(getNotification(mTimeToSync+"days delay"), mTimeToSync*1000);
+            scheduleNotification(getNotification(mTimeToSync + "days delay"), mTimeToSync * 1000);
         } else {
 
             mLocationManager.removeUpdates(this);
@@ -114,6 +111,7 @@ public class PushLocationService extends Service implements LocationListener, Sh
             // TODO: Consider calling
             return;
         }
+        mEditor.putString("lastLoc", mPreparedLocation.keySet().iterator().next());
         mLocationManager.removeUpdates(this);
         deleteNotification();
 
@@ -133,21 +131,29 @@ public class PushLocationService extends Service implements LocationListener, Sh
 
     @Override
     public void onLocationChanged(Location location) {
+        Log.d(TAG, formatLocation(location));
         String roadName = "";
         try {
             roadName = getRoadFromLocation(location);
         } catch (IOException e) {
             e.printStackTrace();
         }
-        if (mPreparedLocation == null) {
-            mPreparedLocation = new HashMap<String, Long>();
-            mPreparedLocation.put(roadName, location.getTime());
-
-        } else if (!mPreparedLocation.containsKey(roadName)) {
-            long nTime = mPreparedLocation.values().iterator().next();
+        if (DBManager.getRiskByRoad(this, location) > 5) {
+            Log.d(TAG, "Play sound");
+            SoundPool soundPool = new SoundPool(10, AudioManager.STREAM_MUSIC, 0);
+            soundPool.setOnLoadCompleteListener(this);
+            soundPool.play(soundPool.load(this, R.raw.explosion, 1), 1, 1, 0, 0, 1);
+        }
+        if (!mPreparedLocation.containsKey(roadName)) {
+            long oTime = mPreparedLocation.values().iterator().next();
+            if (oTime == 0l) {
+                oTime = Calendar.getInstance().getTimeInMillis();
+            }
+            long nTime = (location.getTime() - oTime) / 1000;
+            Log.d(TAG, "New time long: " + nTime + " int: " + (int) nTime + "location time: " + location.getTime() + "old time: " + oTime);
             mPreparedLocation.remove(mPreparedLocation.keySet().iterator().next());
-            mPreparedLocation.put(roadName, location.getTime() - nTime);
-            mDbManager.insert(mPreparedLocation, this);
+            mPreparedLocation.put(roadName, (int) nTime);
+            DBManager.insert(this, mPreparedLocation);
 
         }
 
@@ -209,4 +215,8 @@ public class PushLocationService extends Service implements LocationListener, Sh
         return builder.build();
     }
 
+    @Override
+    public void onLoadComplete(SoundPool soundPool, int i, int i1) {
+
+    }
 }

@@ -8,7 +8,6 @@ import org.json.JSONObject;
 public class DataJsonExporter extends DataExporter {
 
     private JSONObject jsonRoot;
-    private JSONObject jsonDB;
     private JSONObject row;
     private JSONArray table;
 
@@ -20,18 +19,18 @@ public class DataJsonExporter extends DataExporter {
 
     @Override
     protected void prepairExport(String dbName) throws Exception {
-        jsonDB = new JSONObject();
-        jsonRoot.put(dbName, jsonDB);
+        jsonRoot.put("userName", "anatarkina@gmail.com");
     }
 
     @Override
     protected String getExportAsString() throws Exception {
-        return jsonRoot.toString(1);
+        return jsonRoot.toString();
     }
+
 
     protected void startTable(String tableName) throws Exception {
         table = new JSONArray();
-        jsonDB.put(tableName, table);
+        jsonRoot.put(tableName, table);
     }
 
     protected void endTable() throws Exception {

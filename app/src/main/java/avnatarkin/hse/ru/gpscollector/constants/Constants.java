@@ -8,8 +8,8 @@ public class Constants {
 
     public static final String USER_NAME = "userName";
     public static final String FIRST_TIME = "first_time";
-    public static final String URL = "http://192.168.42.201:8080/SpringRest/rest/emp/create";
-    public static final String URL_CREATE_USER = "http://192.168.42.201:8080/SpringRest/rest/user/create";
+    public static final String URL = "http://192.168.42.113:8080/springrest/rest/route/insert/all";
+    public static final String URL_CREATE_USER = "http://192.168.42.113:8080/springrest/rest/user/create";
     public static final String TOKEN = "token";
     public static final String DATASOURCE_VARIABLE = "location";
     public static final String VARIABLE_ID = "variable";
@@ -35,7 +35,7 @@ public class Constants {
 
     public static class VARIABLE_DATABASE {
         public static final String ID_ROAD = "id_road";
-        public static final String ROAD = "road";
-        public static final String TIME = "time";
+        public static final String ROAD = "roadName";
+        public static final String TIME = "roadTime";
     }
 }
