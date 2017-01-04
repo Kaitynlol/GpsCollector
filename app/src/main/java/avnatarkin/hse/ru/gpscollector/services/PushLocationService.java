@@ -16,12 +16,14 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.media.AudioManager;
 import android.media.SoundPool;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
+import android.widget.Toast;
 
 import java.io.IOException;
 import java.util.Calendar;
@@ -54,7 +56,8 @@ public class PushLocationService extends Service implements LocationListener, Sh
 
     @Override
     public IBinder onBind(Intent intent) {
-        return null;
+        Log.d(TAG, "MyService onBind");
+        return new Binder();
     }
 
     @Override
@@ -108,7 +111,7 @@ public class PushLocationService extends Service implements LocationListener, Sh
         Log.d(TAG, "onDestroy");
         stopSelf();
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
+            Toast.makeText(this, R.string.check_permission, Toast.LENGTH_LONG).show();
             return;
         }
         mEditor.putString("lastLoc", mPreparedLocation.keySet().iterator().next());
@@ -194,7 +197,7 @@ public class PushLocationService extends Service implements LocationListener, Sh
     @Override
     public void scheduleNotification(Notification notification, int delay) {
         Intent notificationIntent = new Intent(this, SyncReceiver.class);
-        notificationIntent.putExtra(SyncReceiver.NOTIFICATION_ID, 1);
+        //notificationIntent.putExtra(SyncReceiver.NOTIFICATION, Constants.NOTIFICATION_SYNC_ID);
         notificationIntent.putExtra(SyncReceiver.NOTIFICATION, notification);
         PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 

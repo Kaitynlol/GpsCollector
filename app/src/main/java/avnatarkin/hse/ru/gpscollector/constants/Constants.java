@@ -31,6 +31,7 @@ public class Constants {
     public static final String LOCTABLE_PATH = "/data/avnatarkin.hse.ru.gpscollector/databases/loctable.db";
 
     public static final int NOTIFICATION_ID = 1337;
+    public static final int NOTIFICATION_SYNC_ID = 1338;
 
 
     public static class VARIABLE_DATABASE {

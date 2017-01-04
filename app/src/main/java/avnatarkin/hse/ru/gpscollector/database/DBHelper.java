@@ -15,7 +15,7 @@ public class DBHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "locationtable.db";
 
     public DBHelper(Context context) {
-        super(context, DATABASE_NAME, null, DATABASE_VERSION);
+        super(context.getApplicationContext(), DATABASE_NAME, null, DATABASE_VERSION);
     }
 
     @Override

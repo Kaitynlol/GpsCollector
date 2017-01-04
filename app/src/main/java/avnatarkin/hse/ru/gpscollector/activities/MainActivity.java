@@ -6,9 +6,11 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
@@ -17,10 +19,12 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -54,6 +58,7 @@ import avnatarkin.hse.ru.gpscollector.util.NetworkUtil;
 
 public class MainActivity extends AppCompatActivity implements
         ChangePushTimeFragment.DialogListener, ChangeSyncTimeFragment.SyncDialogListener {
+    private static final String TAG = "Main";
     // Preferences
     private SharedPreferences mSharedPreferences;
     private SharedPreferences.Editor mEditor;
@@ -76,6 +81,10 @@ public class MainActivity extends AppCompatActivity implements
     private GoogleMap mGoogleMap;
     private LatLng mUserLocation;
     private Marker mUserMarker;
+
+    //Binding stuff
+    private ServiceConnection sConn;
+    private boolean mIsBound;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -130,6 +139,18 @@ public class MainActivity extends AppCompatActivity implements
             mEditor.putBoolean(Constants.FIRST_TIME, false);
             mEditor.apply();
         }
+        sConn = new ServiceConnection() {
+            @Override
+            public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+                Log.d(TAG, "ServiceConnected");
+                mIsBound = true;
+            }
+
+            public void onServiceDisconnected(ComponentName name) {
+                Log.d(TAG, "ServiceDisconnected");
+                mIsBound = false;
+            }
+        };
 
         // Check if Google Maps is installed
         if (isGoogleMapsInstalled()) {
@@ -206,15 +227,10 @@ public class MainActivity extends AppCompatActivity implements
                 }
             };
 
+
             // Set the listener to the location manager
             if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                // TODO: Consider calling
-                //    ActivityCompat#requestPermissions
-                // here to request the missing permissions, and then overriding
-                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                //                                          int[] grantResults)
-                // to handle the case where the user grants the permission. See the documentation
-                // for ActivityCompat#requestPermissions for more details.
+                Toast.makeText(this, R.string.check_permission, Toast.LENGTH_LONG).show();
                 return;
             }
             location.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
@@ -257,10 +273,18 @@ public class MainActivity extends AppCompatActivity implements
     // Start the service
     public void startRepeatingService() {
         startService(new Intent(this, PushLocationService.class));
+        if (!mIsBound) {
+            bindService(new Intent(this, PushLocationService.class), sConn, BIND_ABOVE_CLIENT);
+        }
     }
 
     public void stopRepeatingService() {
+        if (mIsBound) {
+            unbindService(sConn);
+            mIsBound = false;
+        }
         stopService(new Intent(this, PushLocationService.class));
+
     }
 
     // Update the button to show the correct message
@@ -300,7 +324,7 @@ public class MainActivity extends AppCompatActivity implements
         String notificationTitle = getString(R.string.notification_title);
 
         Intent intent = new Intent(this, MainActivity.class);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
+        PendingIntent pendingIntent = PendingIntent.getService(this, 0, intent, 0);
 
         // We should use Compat, because we are using API 14+
         NotificationCompat.Builder notification = new NotificationCompat.Builder(this)
@@ -373,13 +397,22 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     protected void onPause() {
+        Log.d(TAG, "MainActivity onPause");
         this.unregisterReceiver(mReceiver);
+        if (mIsBound) {
+            unbindService(sConn);
+            mIsBound = false;
+        }
         super.onPause();
     }
 
     @Override
     protected void onResume() {
+        Log.d(TAG, "MainActivity onResume");
         this.registerReceiver(mReceiver, iFilter);
+        if (!mIsBound) {
+            bindService(new Intent(this, PushLocationService.class), sConn, BIND_ABOVE_CLIENT);
+        }
         checkGooglePlayAvailability();
         super.onResume();
     }

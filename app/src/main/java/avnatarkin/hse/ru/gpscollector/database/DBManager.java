@@ -9,6 +9,8 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.util.Log;
 
+import org.json.JSONObject;
+
 import java.io.IOException;
 import java.util.Locale;
 import java.util.Map;
@@ -56,7 +58,7 @@ public class DBManager {
         db.insert(DBLocation.TABLE_TODO, null, cv);
     }
 
-    public static String exportBase(Context context) throws Exception {
+    public static JSONObject exportBase(Context context) throws Exception {
         DBHelper dbh = new DBHelper(context);
         SQLiteDatabase db = dbh.getWritableDatabase();
         DataExporter dbe = new DataJsonExporter(db);

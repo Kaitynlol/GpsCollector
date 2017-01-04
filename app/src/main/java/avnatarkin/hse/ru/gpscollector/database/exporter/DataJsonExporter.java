@@ -18,6 +18,11 @@ public class DataJsonExporter extends DataExporter {
     }
 
     @Override
+    protected JSONObject getExport() throws Exception {
+        return jsonRoot;
+    }
+
+    @Override
     protected void prepairExport(String dbName) throws Exception {
         jsonRoot.put("userName", "anatarkina@gmail.com");
     }

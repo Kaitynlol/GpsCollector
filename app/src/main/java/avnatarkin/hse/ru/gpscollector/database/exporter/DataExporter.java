@@ -7,6 +7,8 @@ import android.os.Environment;
 import android.text.TextUtils;
 import android.util.Log;
 
+import org.json.JSONObject;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -24,7 +26,7 @@ public abstract class DataExporter {
         this.db = db;
     }
 
-    public String export(String dbName) throws Exception {
+    public JSONObject export(String dbName) throws Exception {
         if (dbName == null) {
             throw new IllegalArgumentException("ExportConfig.databaseName must not be null");
         }
@@ -53,7 +55,7 @@ public abstract class DataExporter {
         }
         c.close();
         Log.i(LOG_TAG, "exporting database complete");
-        return getExportAsString();
+        return getExport();
     }
 
     private void exportTable(final String tableName) throws Exception {
@@ -104,6 +106,8 @@ public abstract class DataExporter {
             }
         }
     }
+
+    abstract protected JSONObject getExport() throws Exception;
 
     abstract protected String getExportAsString() throws Exception;
 

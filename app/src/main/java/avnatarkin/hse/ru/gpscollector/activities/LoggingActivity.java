@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -27,7 +28,6 @@ import org.json.JSONObject;
 
 import avnatarkin.hse.ru.gpscollector.R;
 import avnatarkin.hse.ru.gpscollector.constants.Constants;
-import avnatarkin.hse.ru.gpscollector.receivers.SyncReceiver;
 
 
 public class LoggingActivity extends AppCompatActivity implements
@@ -125,7 +125,7 @@ public class LoggingActivity extends AppCompatActivity implements
         Log.d(TAG, "handleSignInResult:" + result.isSuccess());
         if (result.isSuccess()) {
             // Signed in successfully, show authenticated UI.
-            SharedPreferences sharedPreferences = this.getSharedPreferences(Constants.DERICTORY, Context.MODE_PRIVATE);
+            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
             SharedPreferences.Editor editor = sharedPreferences.edit();
 
             GoogleSignInAccount acct = result.getSignInAccount();
@@ -137,8 +137,10 @@ public class LoggingActivity extends AppCompatActivity implements
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-            final String url = sharedPreferences.getString(Constants.URL_CREATE_USER, "");
-            new SyncReceiver.HttpAsyncTask(this, json.toString(), url).execute();
+            String url = sharedPreferences.getString(Constants.URL_CREATE_USER, "");
+            Log.e(TAG, "URL" + url);
+            // new SyncReceiver.HttpAsyncTask(this, json.toString(), url).execute();
+            // DataLoader.sendData(this,url,json);
             mStatusTextView.setText(getString(R.string.signed_in_fmt, acct.getDisplayName()));
 
             updateUI(true);

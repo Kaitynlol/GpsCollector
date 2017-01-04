@@ -7,6 +7,7 @@
     <string name="main_descriptionText2">GpsCollector for Android® helps you push sensor data
         from your phone to your Google account</string>
     <string name="logging_empty">Please push Sign Up for logging in app using Google account</string>
+    <string name="check_permission">Please allow application to use GPS/network</string>
     <string name="main_login">Login</string>
     <string name="main_signup">Sign up</string>
 
@@ -18,7 +19,7 @@
     <string name="disabled_text">Disabled</string>
     <string name="instruction">When enabled, this app will send your location data to
         GpsCollector at the time intervals you specify</string>
-    <string name="notification_title">Работаем бля</string>
+    <string name="notification_title">Location Service work</string>
 
     <plurals name="pushes_seconds">
         <item quantity="one">Push every second</item>

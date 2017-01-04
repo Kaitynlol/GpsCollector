@@ -10,6 +10,13 @@ import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.VolleyLog;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -28,7 +35,6 @@ import avnatarkin.hse.ru.gpscollector.database.DBManager;
 
 
 public class SyncReceiver extends BroadcastReceiver {
-    public static String NOTIFICATION_ID = "notification-id";
     public static String NOTIFICATION = "notification";
     private final String TAG = "SYNC";
 
@@ -40,28 +46,59 @@ public class SyncReceiver extends BroadcastReceiver {
         NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 
         Notification notification = intent.getParcelableExtra(NOTIFICATION);
-        int id = intent.getIntExtra(NOTIFICATION_ID, 0);
-        notificationManager.notify(id, notification);
+        notificationManager.notify(Constants.NOTIFICATION_SYNC_ID, notification);
 
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
 
-        String base = null;
+        JSONObject base = null;
         try {
             base = DBManager.exportBase(context);
         } catch (Exception e) {
-            e.printStackTrace();
+            throw new RuntimeException("Corrupted DataBase!");
         }
         final String url = sharedPreferences.getString(Constants.URL, "god damn");
         Log.w(TAG, "URL: " + url);
-        new HttpAsyncTask(context, base, url).execute();
+        sendDataToServer(context, url, base);
+        //HttpAsyncTask myTask = new HttpAsyncTask(context, base, url);
+        //myTask.execute();
     }
 
+    private void sendDataToServer(Context context, final String url, JSONObject json) {
+        RequestQueue queue = Volley.newRequestQueue(context);
+        // Define the POST request
+        VolleyLog.v("URL:" + url);
+        JsonObjectRequest req = new JsonObjectRequest(url, json,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        try {
+                            VolleyLog.v("Response:%n %s", response.toString(4));
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                VolleyLog.e("Error: ", error.getMessage() + url);
+            }
+        });
 
+        // Add the request object to the queue to be executed
+        queue.add(req);
+        deleteNotification(context);
+    }
+
+    private static void deleteNotification(Context context) {
+        NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        notificationManager.cancel(Constants.NOTIFICATION_SYNC_ID);
+    }
+
+    @Deprecated
     public static class HttpAsyncTask extends
             AsyncTask<Void, Void, Boolean> {
 
         String urlString;
-
         private final String TAG = "POST_JSON";
         private Context context;
         private String root;
@@ -69,7 +106,7 @@ public class SyncReceiver extends BroadcastReceiver {
         public HttpAsyncTask(Context context, String base, String URL) {
             this.urlString = URL;
             this.root = base;
-            this.context = context;
+            this.context = context.getApplicationContext();
         }
 
         @Override
@@ -151,8 +188,9 @@ public class SyncReceiver extends BroadcastReceiver {
                 // displayLoding(false);
                 // finish();
             }
-
+            deleteNotification(context);
         }
+
 
         public String performPostCall(String requestURL,
                                       HashMap<String, String> postDataParams) {
@@ -179,7 +217,7 @@ public class SyncReceiver extends BroadcastReceiver {
              * JSON
              */
 
-                 //
+                //
                 // String token = Static.getPrefsToken(context);
 
                 // root.put("securityInfo", Static.getSecurityInfo(context));
@@ -210,6 +248,7 @@ public class SyncReceiver extends BroadcastReceiver {
                 }
             } catch (Exception e) {
                 e.printStackTrace();
+                this.cancel(true);
             }
 
             return response;
