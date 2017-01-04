@@ -137,7 +137,8 @@ public class LoggingActivity extends AppCompatActivity implements
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-            new SyncReceiver.HttpAsyncTask(this, json.toString(), Constants.URL_CREATE_USER).execute();
+            final String url = sharedPreferences.getString(Constants.URL_CREATE_USER, "");
+            new SyncReceiver.HttpAsyncTask(this, json.toString(), url).execute();
             mStatusTextView.setText(getString(R.string.signed_in_fmt, acct.getDisplayName()));
 
             updateUI(true);

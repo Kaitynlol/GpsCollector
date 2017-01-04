@@ -68,7 +68,7 @@ public class PushLocationService extends Service implements LocationListener, Sh
         int connectionStatus = NetworkUtil.getConnectionStatus(this);
         // Check if the service is still activated by the user
         boolean isRunning = mPrefs.getBoolean(Constants.SERVICE_RUNNING, false);
-        mTimeToSync = mPrefs.getInt(Constants.SYNC_TIME, 5);
+        mTimeToSync = Integer.valueOf(mPrefs.getString(Constants.SYNC_TIME, "5"));
         mPreparedLocation = new HashMap<String, Integer>();
         mPreparedLocation.put(mPrefs.getString("lastLoc", "улица Бусыгина"), 0);
 

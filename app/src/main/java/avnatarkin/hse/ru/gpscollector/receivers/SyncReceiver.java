@@ -5,7 +5,9 @@ import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
 import org.json.JSONException;
@@ -28,6 +30,7 @@ import avnatarkin.hse.ru.gpscollector.database.DBManager;
 public class SyncReceiver extends BroadcastReceiver {
     public static String NOTIFICATION_ID = "notification-id";
     public static String NOTIFICATION = "notification";
+    private final String TAG = "SYNC";
 
     public SyncReceiver() {
     }
@@ -40,15 +43,19 @@ public class SyncReceiver extends BroadcastReceiver {
         int id = intent.getIntExtra(NOTIFICATION_ID, 0);
         notificationManager.notify(id, notification);
 
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+
         String base = null;
         try {
-            DBManager.exportBase(context);
+            base = DBManager.exportBase(context);
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-        new HttpAsyncTask(context, base, Constants.URL).execute();
+        final String url = sharedPreferences.getString(Constants.URL, "god damn");
+        Log.w(TAG, "URL: " + url);
+        new HttpAsyncTask(context, base, url).execute();
     }
+
 
     public static class HttpAsyncTask extends
             AsyncTask<Void, Void, Boolean> {

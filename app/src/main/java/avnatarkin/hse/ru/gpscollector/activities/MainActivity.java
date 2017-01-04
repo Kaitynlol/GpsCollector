@@ -116,7 +116,7 @@ public class MainActivity extends AppCompatActivity implements
         mAlreadyRunning =
                 mSharedPreferences.getBoolean(Constants.SERVICE_RUNNING, false);
         mTimeToPush = mSharedPreferences.getInt(Constants.PUSH_TIME, 1);
-        mTimeToSync = mSharedPreferences.getInt(Constants.SYNC_TIME, 5);
+        mTimeToSync = Integer.valueOf(mSharedPreferences.getString(Constants.SYNC_TIME, "5"));
 
         // Set the text at the left of the Switch
         ((TextView) findViewById(R.id.toggleText)).setText((mAlreadyRunning) ?
@@ -409,8 +409,9 @@ public class MainActivity extends AppCompatActivity implements
             Toast.makeText(this, "Nothing there", Toast.LENGTH_LONG).show();
             // TODO: something for help
         } else if (id == R.id.action_sync_settings) {
-            ChangeSyncTimeFragment fragment = new ChangeSyncTimeFragment();
-            fragment.show(getFragmentManager(), "GCOLL_DIALOG_PUSH");
+          /*  ChangeSyncTimeFragment fragment = new ChangeSyncTimeFragment();
+            fragment.show(getFragmentManager(), "GCOLL_DIALOG_PUSH");*/
+            startActivity(new Intent(this, PrefActivity.class));
         }
 
         return super.onOptionsItemSelected(item);

@@ -6,15 +6,15 @@ import android.preference.PreferenceFragment;
 import avnatarkin.hse.ru.gpscollector.R;
 
 /**
- * Created by sanjar on 02.01.17.
+ * Created by sanjar on 03.01.17.
  */
-public class SettingsFragment extends PreferenceFragment {
+
+public class ConnectionSettings extends PreferenceFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         // Load the preferences from an XML resource
-        addPreferencesFromResource(R.xml.pref_app);
+        addPreferencesFromResource(R.xml.pref_conn);
     }
-
 }
