@@ -1,6 +1,6 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context="avnatarkin.hse.ru.gpscollector.activities.MainActivity" >
+    tools:context="avnatarkin.hse.ru.gpscollector.main.MainActivity">
 
     <item android:id="@+id/action_change_token"
         android:title="@string/action_linkPhone"

@@ -17,9 +17,9 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 
-import avnatarkin.hse.ru.gpscollector.constants.Constants;
 import avnatarkin.hse.ru.gpscollector.database.exporter.DataExporter;
 import avnatarkin.hse.ru.gpscollector.database.exporter.DataJsonExporter;
+import avnatarkin.hse.ru.gpscollector.util.constants.Constants;
 
 /**
  * Created by sanjar on 11.11.16.

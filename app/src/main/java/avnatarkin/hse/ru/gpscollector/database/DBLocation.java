@@ -3,7 +3,7 @@ package avnatarkin.hse.ru.gpscollector.database;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
-import avnatarkin.hse.ru.gpscollector.constants.Constants;
+import avnatarkin.hse.ru.gpscollector.util.constants.Constants;
 
 /**
  * Created by sanjar on 11.11.16.

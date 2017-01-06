@@ -1,4 +1,4 @@
-package avnatarkin.hse.ru.gpscollector.activities;
+package avnatarkin.hse.ru.gpscollector.settings;
 
 import android.preference.PreferenceActivity;
 

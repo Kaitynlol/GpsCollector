@@ -1,21 +1,21 @@
-package avnatarkin.hse.ru.gpscollector;
+package avnatarkin.hse.ru.gpscollector.auth;
 
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.widget.Toast;
 
-import avnatarkin.hse.ru.gpscollector.activities.LoggingActivity;
-import avnatarkin.hse.ru.gpscollector.constants.Constants;
-import avnatarkin.hse.ru.gpscollector.fragments.MainFragment;
-import avnatarkin.hse.ru.gpscollector.activities.MainActivity;
+import avnatarkin.hse.ru.gpscollector.R;
+import avnatarkin.hse.ru.gpscollector.auth.fragments.AuthFragment;
+import avnatarkin.hse.ru.gpscollector.main.MainActivity;
+import avnatarkin.hse.ru.gpscollector.util.constants.Constants;
 
-public class AuticationActivity extends AppCompatActivity implements MainFragment.MainFragmentButtonsInterface {
+public class AuticationActivity extends AppCompatActivity implements AuthFragment.MainFragmentButtonsInterface {
     // We want to know if the user has logged in before
     private SharedPreferences mSharedPreferences;
     private boolean mUserFirstTime;
@@ -32,7 +32,7 @@ public class AuticationActivity extends AppCompatActivity implements MainFragmen
 
         if (savedInstanceState == null) {
             if (mUserFirstTime) {
-                MainFragment mainFragment = new MainFragment();
+                AuthFragment mainFragment = new AuthFragment();
                 getFragmentManager()
                         .beginTransaction()
                         .add(R.id.fragment_container, mainFragment)
@@ -44,7 +44,8 @@ public class AuticationActivity extends AppCompatActivity implements MainFragmen
             }
         }
     }
-    // Method from MainFragment
+
+    // Method from AuthFragment
     @Override
     public void onLoginButtonClick(Fragment fragment) {
         SharedPreferences sharedPreferences = this.getSharedPreferences("avnatarkin.hse.ru.gpscollector", Context.MODE_PRIVATE);
@@ -59,7 +60,7 @@ public class AuticationActivity extends AppCompatActivity implements MainFragmen
 
     }
 
-    // Method from MainFragment
+    // Method from AuthFragment
     @Override
     public void onSignUpButtonClick(Fragment fragment) {
        startActivity(new Intent(this,LoggingActivity.class));

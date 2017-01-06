@@ -24,26 +24,26 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
 
-        <activity android:name=".AuticationActivity">
+        <activity android:name=".auth.AuticationActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".activities.MainActivity" />
-        <activity android:name=".activities.LoggingActivity" />
+        <activity android:name=".main.MainActivity" />
+        <activity android:name=".auth.LoggingActivity" />
 
         <service
             android:name=".services.PushLocationService"
             android:enabled="true" />
 
         <receiver
-            android:name=".receivers.SyncReceiver"
+            android:name=".sync.SyncReceiver"
             android:enabled="true"
             android:exported="true" />
 
-        <activity android:name=".activities.PrefActivity"></activity>
+        <activity android:name=".settings.PrefActivity"></activity>
     </application>
 
 </manifest>

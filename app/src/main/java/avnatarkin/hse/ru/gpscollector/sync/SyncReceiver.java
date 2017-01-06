@@ -1,6 +1,5 @@
-package avnatarkin.hse.ru.gpscollector.receivers;
+package avnatarkin.hse.ru.gpscollector.sync;
 
-import android.app.Notification;
 import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -30,8 +29,9 @@ import java.util.HashMap;
 import javax.net.ssl.HttpsURLConnection;
 
 import avnatarkin.hse.ru.gpscollector.R;
-import avnatarkin.hse.ru.gpscollector.constants.Constants;
 import avnatarkin.hse.ru.gpscollector.database.DBManager;
+import avnatarkin.hse.ru.gpscollector.sync.util.SyncWrapper;
+import avnatarkin.hse.ru.gpscollector.util.constants.Constants;
 
 
 public class SyncReceiver extends BroadcastReceiver {
@@ -43,11 +43,6 @@ public class SyncReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-
-        Notification notification = intent.getParcelableExtra(NOTIFICATION);
-        notificationManager.notify(Constants.NOTIFICATION_SYNC_ID, notification);
-
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
 
         JSONObject base = null;
@@ -58,11 +53,10 @@ public class SyncReceiver extends BroadcastReceiver {
         }
         final String url = sharedPreferences.getString(Constants.URL, "god damn");
         Log.w(TAG, "URL: " + url);
-        sendDataToServer(context, url, base);
-        //HttpAsyncTask myTask = new HttpAsyncTask(context, base, url);
-        //myTask.execute();
+        SyncWrapper.sendDataToServer(context.getApplicationContext(), url, base);
     }
 
+    @Deprecated
     private void sendDataToServer(Context context, final String url, JSONObject json) {
         RequestQueue queue = Volley.newRequestQueue(context);
         // Define the POST request
@@ -89,9 +83,10 @@ public class SyncReceiver extends BroadcastReceiver {
         deleteNotification(context);
     }
 
+    @Deprecated
     private static void deleteNotification(Context context) {
         NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-        notificationManager.cancel(Constants.NOTIFICATION_SYNC_ID);
+        // notificationManager.cancel(Constants.NOTIFICATION_SYNC_ID);
     }
 
     @Deprecated

@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <preference-headers xmlns:android="http://schemas.android.com/apk/res/android">
     <header
-        android:fragment="avnatarkin.hse.ru.gpscollector.fragments.SettingsFragment"
+        android:fragment="avnatarkin.hse.ru.gpscollector.settings.fragments.SettingsFragment"
         android:icon="@android:drawable/ic_menu_manage"
         android:summary="@string/header_setting_fragment"
         android:title="@string/header_title_setting_fragment"></header>
     <header
-        android:fragment="avnatarkin.hse.ru.gpscollector.fragments.ConnectionSettings"
+        android:fragment="avnatarkin.hse.ru.gpscollector.settings.fragments.ConnectionSettings"
         android:icon="@android:drawable/ic_menu_info_details"
         android:summary="@string/header_connection_fragment"
         android:title="@string/header_title_connection_fragment"></header>

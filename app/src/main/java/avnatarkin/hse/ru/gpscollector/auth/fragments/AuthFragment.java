@@ -1,8 +1,7 @@
-package avnatarkin.hse.ru.gpscollector.fragments;
+package avnatarkin.hse.ru.gpscollector.auth.fragments;
 
 import android.app.Activity;
 import android.app.Fragment;
-import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,7 +10,7 @@ import android.widget.Button;
 
 import avnatarkin.hse.ru.gpscollector.R;
 
-public class MainFragment extends Fragment {
+public class AuthFragment extends Fragment {
     public interface MainFragmentButtonsInterface {
         public void onLoginButtonClick(Fragment fragment);
         public void onSignUpButtonClick(Fragment fragment);
@@ -21,7 +20,7 @@ public class MainFragment extends Fragment {
     private Button mSignUpButton;
     private MainFragmentButtonsInterface mInterface;
 
-    public MainFragment() {
+    public AuthFragment() {
         // Required empty public constructor
     }
 
@@ -53,14 +52,14 @@ public class MainFragment extends Fragment {
     private class LoginButtonClickListener implements View.OnClickListener {
         @Override
         public void onClick(View v) {
-            mInterface.onLoginButtonClick(MainFragment.this);
+            mInterface.onLoginButtonClick(AuthFragment.this);
         }
     }
 
     private class SignUpButtonClickListener implements View.OnClickListener {
         @Override
         public void onClick(View v) {
-            mInterface.onSignUpButtonClick(MainFragment.this);
+            mInterface.onSignUpButtonClick(AuthFragment.this);
         }
     }
 }

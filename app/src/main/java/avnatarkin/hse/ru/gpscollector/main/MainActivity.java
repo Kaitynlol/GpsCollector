@@ -1,4 +1,4 @@
-package avnatarkin.hse.ru.gpscollector.activities;
+package avnatarkin.hse.ru.gpscollector.main;
 
 import android.app.ActionBar;
 import android.app.DialogFragment;
@@ -6,11 +6,9 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
@@ -19,7 +17,6 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.NotificationCompat;
@@ -47,14 +44,16 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.lang.reflect.Field;
 
-import avnatarkin.hse.ru.gpscollector.AuticationActivity;
 import avnatarkin.hse.ru.gpscollector.R;
-import avnatarkin.hse.ru.gpscollector.constants.Constants;
+import avnatarkin.hse.ru.gpscollector.auth.AuticationActivity;
 import avnatarkin.hse.ru.gpscollector.database.DBManager;
-import avnatarkin.hse.ru.gpscollector.fragments.ChangePushTimeFragment;
-import avnatarkin.hse.ru.gpscollector.fragments.ChangeSyncTimeFragment;
+import avnatarkin.hse.ru.gpscollector.main.fragments.ChangePushTimeFragment;
+import avnatarkin.hse.ru.gpscollector.main.fragments.ChangeSyncTimeFragment;
 import avnatarkin.hse.ru.gpscollector.services.PushLocationService;
+import avnatarkin.hse.ru.gpscollector.settings.PrefActivity;
 import avnatarkin.hse.ru.gpscollector.util.NetworkUtil;
+import avnatarkin.hse.ru.gpscollector.util.NotificationWrapper;
+import avnatarkin.hse.ru.gpscollector.util.constants.Constants;
 
 public class MainActivity extends AppCompatActivity implements
         ChangePushTimeFragment.DialogListener, ChangeSyncTimeFragment.SyncDialogListener {
@@ -81,10 +80,6 @@ public class MainActivity extends AppCompatActivity implements
     private GoogleMap mGoogleMap;
     private LatLng mUserLocation;
     private Marker mUserMarker;
-
-    //Binding stuff
-    private ServiceConnection sConn;
-    private boolean mIsBound;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -139,18 +134,6 @@ public class MainActivity extends AppCompatActivity implements
             mEditor.putBoolean(Constants.FIRST_TIME, false);
             mEditor.apply();
         }
-        sConn = new ServiceConnection() {
-            @Override
-            public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
-                Log.d(TAG, "ServiceConnected");
-                mIsBound = true;
-            }
-
-            public void onServiceDisconnected(ComponentName name) {
-                Log.d(TAG, "ServiceDisconnected");
-                mIsBound = false;
-            }
-        };
 
         // Check if Google Maps is installed
         if (isGoogleMapsInstalled()) {
@@ -256,12 +239,16 @@ public class MainActivity extends AppCompatActivity implements
                     startRepeatingService();
                     mEditor.putBoolean(Constants.SERVICE_RUNNING, true);
                     ((TextView) findViewById(R.id.toggleText)).setText(getString(R.string.enabled_text));
-                    createNotification();
+                    String notificationTitle = getString(R.string.notification_title);
+                    NotificationWrapper.createNotification(MainActivity.this, notificationTitle, NotificationWrapper.NOTIFICATION_ID, true);
+                    // createNotification();
                 } else {
                     stopRepeatingService();
                     mEditor.putBoolean(Constants.SERVICE_RUNNING, false);
                     ((TextView) findViewById(R.id.toggleText)).setText(getString(R.string.disabled_text));
-                    deleteNotification();
+                    NotificationWrapper.deleteNotification(MainActivity.this, NotificationWrapper.NOTIFICATION_ID);
+                    NotificationWrapper.deleteNotification(MainActivity.this, NotificationWrapper.NOTIFICATION_SYNC_ID);
+                    //deleteNotification();
                 }
                 mAlreadyRunning = !mAlreadyRunning;
                 mEditor.apply();
@@ -273,16 +260,9 @@ public class MainActivity extends AppCompatActivity implements
     // Start the service
     public void startRepeatingService() {
         startService(new Intent(this, PushLocationService.class));
-        if (!mIsBound) {
-            bindService(new Intent(this, PushLocationService.class), sConn, BIND_ABOVE_CLIENT);
-        }
     }
 
     public void stopRepeatingService() {
-        if (mIsBound) {
-            unbindService(sConn);
-            mIsBound = false;
-        }
         stopService(new Intent(this, PushLocationService.class));
 
     }
@@ -319,6 +299,7 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     // Create the notification to notify the user that the service is running
+    @Deprecated
     public void createNotification() {
         String ns = Context.NOTIFICATION_SERVICE;
         String notificationTitle = getString(R.string.notification_title);
@@ -340,14 +321,15 @@ public class MainActivity extends AppCompatActivity implements
         notificationCompat.flags |= Notification.FLAG_ONGOING_EVENT;
 
         // Push the notification
-        notificationManager.notify(Constants.NOTIFICATION_ID, notificationCompat);
+        notificationManager.notify(NotificationWrapper.NOTIFICATION_ID, notificationCompat);
     }
 
     // Delete the notification
+    @Deprecated
     public void deleteNotification() {
         String ns = Context.NOTIFICATION_SERVICE;
         NotificationManager notificationManager = (NotificationManager) getSystemService(ns);
-        notificationManager.cancel(Constants.NOTIFICATION_ID);
+        // notificationManager.cancel(Constants.NOTIFICATION_ID);
     }
 
     // Method from the dialog to handle the click
@@ -399,10 +381,6 @@ public class MainActivity extends AppCompatActivity implements
     protected void onPause() {
         Log.d(TAG, "MainActivity onPause");
         this.unregisterReceiver(mReceiver);
-        if (mIsBound) {
-            unbindService(sConn);
-            mIsBound = false;
-        }
         super.onPause();
     }
 
@@ -410,9 +388,6 @@ public class MainActivity extends AppCompatActivity implements
     protected void onResume() {
         Log.d(TAG, "MainActivity onResume");
         this.registerReceiver(mReceiver, iFilter);
-        if (!mIsBound) {
-            bindService(new Intent(this, PushLocationService.class), sConn, BIND_ABOVE_CLIENT);
-        }
         checkGooglePlayAvailability();
         super.onResume();
     }
@@ -460,7 +435,7 @@ public class MainActivity extends AppCompatActivity implements
                 mSwitch.setEnabled(true);
             } else {
                 if (mSharedPreferences.getBoolean(Constants.SERVICE_RUNNING, false)) {
-                    deleteNotification();
+                    NotificationWrapper.deleteNotification(MainActivity.this, NotificationWrapper.NOTIFICATION_ID);
                 }
                 mPushTimeButton.setEnabled(false);
                 mSwitch.setChecked(false);

@@ -1,4 +1,4 @@
-package avnatarkin.hse.ru.gpscollector.activities;
+package avnatarkin.hse.ru.gpscollector.auth;
 
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -27,7 +27,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import avnatarkin.hse.ru.gpscollector.R;
-import avnatarkin.hse.ru.gpscollector.constants.Constants;
+import avnatarkin.hse.ru.gpscollector.main.MainActivity;
+import avnatarkin.hse.ru.gpscollector.util.constants.Constants;
 
 
 public class LoggingActivity extends AppCompatActivity implements

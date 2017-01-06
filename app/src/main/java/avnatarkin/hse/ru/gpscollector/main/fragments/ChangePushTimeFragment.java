@@ -1,15 +1,18 @@
-package avnatarkin.hse.ru.gpscollector.fragments;
+package avnatarkin.hse.ru.gpscollector.main.fragments;
 
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 
 import avnatarkin.hse.ru.gpscollector.R;
+
+/**
+ * Created by sanjar on 11.12.16.
+ */
 
 public class ChangePushTimeFragment extends DialogFragment {
     public interface DialogListener {

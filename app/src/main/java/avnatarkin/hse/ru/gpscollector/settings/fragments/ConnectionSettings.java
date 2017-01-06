@@ -1,4 +1,4 @@
-package avnatarkin.hse.ru.gpscollector.fragments;
+package avnatarkin.hse.ru.gpscollector.settings.fragments;
 
 import android.os.Bundle;
 import android.preference.PreferenceFragment;

@@ -1,4 +1,4 @@
-package avnatarkin.hse.ru.gpscollector.constants;
+package avnatarkin.hse.ru.gpscollector.util.constants;
 
 public class Constants {
 
@@ -30,8 +30,6 @@ public class Constants {
     public static final String DERICTORY = "avnatarkin.hse.ru.gpscollector";
     public static final String LOCTABLE_PATH = "/data/avnatarkin.hse.ru.gpscollector/databases/loctable.db";
 
-    public static final int NOTIFICATION_ID = 1337;
-    public static final int NOTIFICATION_SYNC_ID = 1338;
 
 
     public static class VARIABLE_DATABASE {

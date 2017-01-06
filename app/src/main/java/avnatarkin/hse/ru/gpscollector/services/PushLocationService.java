@@ -3,7 +3,6 @@ package avnatarkin.hse.ru.gpscollector.services;
 import android.Manifest;
 import android.app.AlarmManager;
 import android.app.Notification;
-import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
@@ -33,11 +32,12 @@ import java.util.Locale;
 import java.util.TimeZone;
 
 import avnatarkin.hse.ru.gpscollector.R;
-import avnatarkin.hse.ru.gpscollector.constants.Constants;
 import avnatarkin.hse.ru.gpscollector.database.DBManager;
-import avnatarkin.hse.ru.gpscollector.receivers.SyncReceiver;
+import avnatarkin.hse.ru.gpscollector.sync.SyncReceiver;
 import avnatarkin.hse.ru.gpscollector.util.NetworkUtil;
+import avnatarkin.hse.ru.gpscollector.util.NotificationWrapper;
 import avnatarkin.hse.ru.gpscollector.util.Sheduller;
+import avnatarkin.hse.ru.gpscollector.util.constants.Constants;
 
 public class PushLocationService extends Service implements LocationListener, Sheduller, SoundPool.OnLoadCompleteListener {
     private static final String TAG = "LSERVICE";
@@ -120,20 +120,13 @@ public class PushLocationService extends Service implements LocationListener, Sh
         mEditor.putString("lastLoc", mPreparedLocation);
         mEditor.commit();
         mLocationManager.removeUpdates(this);
-        deleteNotification();
+        NotificationWrapper.deleteNotification(this, NotificationWrapper.NOTIFICATION_ID);
 
         super.onDestroy();
     }
 
     public void initializeLocationUpdates() {
         mLocationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
-    }
-
-    public void deleteNotification() {
-        String ns = Context.NOTIFICATION_SERVICE;
-        NotificationManager man = (NotificationManager)
-                getApplicationContext().getSystemService(ns);
-        man.cancel(Constants.NOTIFICATION_ID);
     }
 
     @Override
