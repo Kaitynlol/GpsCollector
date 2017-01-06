@@ -26,11 +26,11 @@ import android.util.Log;
 import android.widget.Toast;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Locale;
-import java.util.Map;
+import java.util.TimeZone;
 
 import avnatarkin.hse.ru.gpscollector.R;
 import avnatarkin.hse.ru.gpscollector.constants.Constants;
@@ -51,7 +51,8 @@ public class PushLocationService extends Service implements LocationListener, Sh
     //Shedulling
     private int mTimeToSync = 5;
 
-    private Map<String, Integer> mPreparedLocation;
+    private String mPreparedLocation;
+    private long mLastLocationMillis;
 
 
     @Override
@@ -72,8 +73,10 @@ public class PushLocationService extends Service implements LocationListener, Sh
         // Check if the service is still activated by the user
         boolean isRunning = mPrefs.getBoolean(Constants.SERVICE_RUNNING, false);
         mTimeToSync = Integer.valueOf(mPrefs.getString(Constants.SYNC_TIME, "5"));
-        mPreparedLocation = new HashMap<String, Integer>();
-        mPreparedLocation.put(mPrefs.getString("lastLoc", "улица Бусыгина"), 0);
+        //mPreparedLocation = new HashMap<String, Long>();
+        mLastLocationMillis = Calendar.getInstance().getTimeInMillis();
+        // mPreparedLocation.put(mPrefs.getString("lastLoc", "улица Бусыгина"),mLastLocationMillis );
+        mPreparedLocation = mPrefs.getString("lastLoc", "улица Бусыгина");
 
 
         // If we have network connection
@@ -114,7 +117,8 @@ public class PushLocationService extends Service implements LocationListener, Sh
             Toast.makeText(this, R.string.check_permission, Toast.LENGTH_LONG).show();
             return;
         }
-        mEditor.putString("lastLoc", mPreparedLocation.keySet().iterator().next());
+        mEditor.putString("lastLoc", mPreparedLocation);
+        mEditor.commit();
         mLocationManager.removeUpdates(this);
         deleteNotification();
 
@@ -147,16 +151,20 @@ public class PushLocationService extends Service implements LocationListener, Sh
             soundPool.setOnLoadCompleteListener(this);
             soundPool.play(soundPool.load(this, R.raw.explosion, 1), 1, 1, 0, 0, 1);
         }
-        if (!mPreparedLocation.containsKey(roadName)) {
-            long oTime = mPreparedLocation.values().iterator().next();
-            if (oTime == 0l) {
-                oTime = Calendar.getInstance().getTimeInMillis();
-            }
-            long nTime = (location.getTime() - oTime) / 1000;
-            Log.d(TAG, "New time long: " + nTime + " int: " + (int) nTime + "location time: " + location.getTime() + "old time: " + oTime);
+        if (!mPreparedLocation.equals(roadName)) {
+            Log.d(TAG, "lastLoc: " + mPreparedLocation + " lastTime: " + parceTime(mLastLocationMillis));
+            long nTime = location.getTime();
+            mPreparedLocation = roadName;
+            //mPreparedLocation.put(roadName,nTime);
+            DBManager.insert(this, roadName, (nTime - mLastLocationMillis));
+            mLastLocationMillis = nTime;
+
+           /* mLastLocationMillis = location.getTime();
+            long nTime = (location.getTime() - mLastLocationMillis);
+            Log.d(TAG, "New time long: " + nTime + " Hour: " + nTime + " location time: " + location.getTime() + " old time: " + mLastLocationMillis);
             mPreparedLocation.remove(mPreparedLocation.keySet().iterator().next());
-            mPreparedLocation.put(roadName, (int) nTime);
-            DBManager.insert(this, mPreparedLocation);
+            mPreparedLocation.put(roadName, nTime);
+            DBManager.insert(this, mPreparedLocation);*/
 
         }
 
@@ -218,8 +226,19 @@ public class PushLocationService extends Service implements LocationListener, Sh
         return builder.build();
     }
 
+    private String parceTime(Long t) {
+        String format = "yyyy-MM-dd-HH-mm-ss";
+        SimpleDateFormat sdf = new SimpleDateFormat(format, Locale.getDefault());
+        sdf.setTimeZone(TimeZone.getTimeZone("GMT+4"));
+        String gmtTime = sdf.format(t);
+        Log.w(TAG, "parcelable Time is: " + gmtTime);
+        return gmtTime;
+
+    }
+
     @Override
     public void onLoadComplete(SoundPool soundPool, int i, int i1) {
+
 
     }
 }

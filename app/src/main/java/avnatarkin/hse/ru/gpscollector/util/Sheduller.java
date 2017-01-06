@@ -7,8 +7,8 @@ import android.app.Notification;
  */
 
 public interface Sheduller {
+    void scheduleNotification(Notification notification, int delay);
 
-    public void scheduleNotification(Notification notification, int delay);
-    public Notification getNotification(String content);
+    Notification getNotification(String content);
 
 }

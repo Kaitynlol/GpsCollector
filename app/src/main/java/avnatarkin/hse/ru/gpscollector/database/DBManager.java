@@ -12,8 +12,10 @@ import android.util.Log;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.Locale;
 import java.util.Map;
+import java.util.TimeZone;
 
 import avnatarkin.hse.ru.gpscollector.constants.Constants;
 import avnatarkin.hse.ru.gpscollector.database.exporter.DataExporter;
@@ -46,7 +48,8 @@ public class DBManager {
         // db.insert(DBLocation.TABLE_TODO, null, cv);
     }
 
-    public static void insert(Context context, Map<String, Integer> mPreparedLocation) {
+    @Deprecated
+    public static void insert(Context context, Map<String, Long> mPreparedLocation) {
         Log.d(LOG_TAG, "Write" + mPreparedLocation);
         DBHelper dbh = new DBHelper(context);
         SQLiteDatabase db = dbh.getWritableDatabase();
@@ -54,8 +57,18 @@ public class DBManager {
         ContentValues cv = new ContentValues();
         String road = mPreparedLocation.keySet().iterator().next();
         cv.put(Constants.VARIABLE_DATABASE.ROAD, road);
-        cv.put(Constants.VARIABLE_DATABASE.TIME, mPreparedLocation.get(road));
+        cv.put(Constants.VARIABLE_DATABASE.TIME, parceTime(mPreparedLocation.get(road)));
         db.insert(DBLocation.TABLE_TODO, null, cv);
+    }
+
+    private static String parceTime(Long t) {
+        String format = "HH";
+        SimpleDateFormat sdf = new SimpleDateFormat(format, Locale.getDefault());
+        sdf.setTimeZone(TimeZone.getTimeZone("GMT+4"));
+        String gmtTime = sdf.format(t);
+        Log.w(LOG_TAG, "parcelable Time is: " + gmtTime);
+        return gmtTime;
+
     }
 
     public static JSONObject exportBase(Context context) throws Exception {
@@ -107,5 +120,16 @@ public class DBManager {
 
     public static int getRiskByRoad(LocationListener locationListener, Location location) {
         return 6;
+    }
+
+    public static void insert(Context context, String roadName, long time) {
+        Log.d(LOG_TAG, "Write road: " + roadName + " time:" + time);
+        DBHelper dbh = new DBHelper(context);
+        SQLiteDatabase db = dbh.getWritableDatabase();
+        ContentValues cv = new ContentValues();
+        cv.put(Constants.VARIABLE_DATABASE.ROAD, roadName);
+        cv.put(Constants.VARIABLE_DATABASE.TIME, (time / 1000) % 60);
+        db.insert(DBLocation.TABLE_TODO, null, cv);
+        read(context);
     }
 }
